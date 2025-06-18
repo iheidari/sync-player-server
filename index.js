@@ -6,15 +6,25 @@ require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Configure CORS for production
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "production"
+      ? [process.env.CORS_ORIGIN || "*"]
+      : "*",
+  methods: ["GET", "POST"],
+  credentials: true,
+};
+
 const io = socketIo(server, {
-  cors: {
-    origin: "*", // Configure this properly for production
-    methods: ["GET", "POST"],
-  },
+  cors: corsOptions,
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -219,6 +229,21 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     connectedUsers: connectedUsers.size,
     activeRooms: rooms.size,
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Root route for basic info
+app.get("/", (req, res) => {
+  res.json({
+    message: "Sync Player Server is running!",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    endpoints: {
+      health: "/api/health",
+      rooms: "/api/rooms",
+      testClient: "/index.html",
+    },
   });
 });
 
@@ -226,5 +251,7 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`Socket.IO server ready for room management`);
+  console.log(`Test client available at: http://localhost:${PORT}`);
 });

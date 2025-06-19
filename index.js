@@ -8,18 +8,21 @@ require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
 
-// Configure CORS for production
+// Configure CORS for production - allow all origins for Socket.IO
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? [process.env.CORS_ORIGIN || "*"]
-      : "*",
-  methods: ["GET", "POST"],
+  origin: true, // Allow all origins
+  methods: ["GET", "POST", "OPTIONS"],
   credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 const io = socketIo(server, {
-  cors: corsOptions,
+  cors: {
+    origin: true, // Allow all origins for Socket.IO
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  },
   pingTimeout: 60000,
   pingInterval: 25000,
 });
@@ -51,6 +54,7 @@ app.get("/debug-static", (req, res) => {
       __dirname: __dirname,
       nodeEnv: process.env.NODE_ENV,
       platform: "render",
+      corsOrigin: process.env.CORS_ORIGIN,
     });
   } catch (error) {
     res.json({
@@ -60,6 +64,7 @@ app.get("/debug-static", (req, res) => {
       __dirname: __dirname,
       nodeEnv: process.env.NODE_ENV,
       platform: "render",
+      corsOrigin: process.env.CORS_ORIGIN,
     });
   }
 });
@@ -76,6 +81,7 @@ app.get("/", (req, res) => {
     version: "1.0.0",
     environment: process.env.NODE_ENV || "development",
     platform: "render",
+    corsOrigin: process.env.CORS_ORIGIN,
     endpoints: {
       health: "/api/health",
       rooms: "/api/rooms",
@@ -288,6 +294,7 @@ app.get("/api/health", (req, res) => {
     activeRooms: rooms.size,
     environment: process.env.NODE_ENV || "development",
     platform: "render",
+    corsOrigin: process.env.CORS_ORIGIN,
   });
 });
 
@@ -297,6 +304,9 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`Platform: render`);
+  console.log(
+    `CORS Origin: ${process.env.CORS_ORIGIN || "all origins allowed"}`
+  );
   console.log(`Socket.IO server ready for room management`);
   console.log(`Test client available at: http://localhost:${PORT}`);
 });

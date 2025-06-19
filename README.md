@@ -10,6 +10,40 @@ A Socket.IO server for real-time room management and collaboration.
 - **Typing Indicators**: Show when users are typing messages
 - **Room Status**: Monitor room information and user counts
 
+## Quick Start
+
+### Backend (Render)
+
+1. **Deploy the backend to Render:**
+
+   ```bash
+   # Follow the deployment guide in DEPLOYMENT.md
+   ```
+
+2. **Your backend will be available at:**
+   ```
+   https://your-app-name.onrender.com
+   ```
+
+### Frontend (Vercel)
+
+1. **Deploy the frontend to Vercel:**
+
+   - Copy the files from `public/` directory
+   - Update `config.js` with your Render backend URL
+   - Deploy to Vercel
+
+2. **Your frontend will be available at:**
+
+   ```
+   https://your-app-name.vercel.app
+   ```
+
+3. **For detailed frontend deployment instructions, see:**
+   ```
+   FRONTEND_DEPLOYMENT.md
+   ```
+
 ## Installation
 
 1. Install dependencies:

@@ -1,8 +1,8 @@
-# Deployment Guide - Vercel
+# Deployment Guide - Render
 
-This guide will help you deploy your Socket.IO server to Vercel.
+This guide will help you deploy your Socket.IO server to Render.
 
-## 🚀 Deploy to Vercel
+## 🚀 Deploy to Render
 
 ### Prerequisites
 
@@ -11,58 +11,59 @@ This guide will help you deploy your Socket.IO server to Vercel.
 
 ### Steps:
 
-1. **Go to Vercel**
+1. **Go to Render**
 
-   - Visit [vercel.com](https://vercel.com)
+   - Visit [render.com](https://render.com)
    - Sign up with your GitHub account
 
-2. **Import Your Project**
+2. **Create New Web Service**
 
-   - Click "New Project"
-   - Import your GitHub repository
-   - Vercel will automatically detect it's a Node.js app
+   - Click "New" → "Web Service"
+   - Connect your GitHub repository
+   - Select the repository containing your Socket.IO server
 
-3. **Configure the Project**
+3. **Configure the Service**
 
-   - **Project Name:** `sync-player-server` (or any name you prefer)
-   - **Framework Preset:** Node.js (auto-detected)
-   - **Root Directory:** `./` (leave as default)
-   - **Build Command:** Leave empty (not needed for this project)
-   - **Output Directory:** Leave empty (not needed for this project)
-   - **Install Command:** `npm install`
+   - **Name:** `sync-player-server` (or any name you prefer)
+   - **Environment:** `Node`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+   - **Plan:** Free (or choose a paid plan)
 
 4. **Environment Variables** (Optional)
 
-   - Click "Environment Variables" section
+   - Click "Environment" tab
    - Add these variables:
      ```
      NODE_ENV=production
+     PORT=10000
      CORS_ORIGIN=https://your-frontend-domain.com
      ```
 
 5. **Deploy**
 
-   - Click "Deploy"
-   - Vercel will automatically build and deploy your app
-   - Wait for the build to complete (usually 1-2 minutes)
+   - Click "Create Web Service"
+   - Render will automatically build and deploy your app
+   - Wait for the build to complete (usually 2-3 minutes)
 
 6. **Your App is Live!**
-   - Your app will be available at: `https://your-app-name.vercel.app`
-   - Test the health endpoint: `https://your-app-name.vercel.app/api/health`
-   - Test the client: `https://your-app-name.vercel.app/index.html`
+   - Your app will be available at: `https://your-app-name.onrender.com`
+   - Test the health endpoint: `https://your-app-name.onrender.com/api/health`
+   - Test the client: `https://your-app-name.onrender.com/index.html`
 
 ## 🔧 Environment Variables
 
-| Variable      | Description              | Default       |
-| ------------- | ------------------------ | ------------- |
-| `NODE_ENV`    | Environment mode         | `development` |
-| `CORS_ORIGIN` | Allowed origins for CORS | `*`           |
+| Variable      | Description              | Default                  |
+| ------------- | ------------------------ | ------------------------ |
+| `NODE_ENV`    | Environment mode         | `development`            |
+| `PORT`        | Server port              | `10000` (Render default) |
+| `CORS_ORIGIN` | Allowed origins for CORS | `*`                      |
 
 ## 📝 Pre-deployment Checklist
 
 - [ ] All files committed to Git
-- [ ] `package.json` has correct dependencies
-- [ ] `vercel.json` configuration file exists
+- [ ] `package.json` has correct start script (`"start": "node index.js"`)
+- [ ] `render.yaml` configuration file exists
 - [ ] Health check endpoint working (`/api/health`)
 - [ ] Socket.IO server properly configured
 
@@ -71,7 +72,7 @@ This guide will help you deploy your Socket.IO server to Vercel.
 1. **Health Check:**
 
    ```
-   https://your-app-name.vercel.app/api/health
+   https://your-app-name.onrender.com/api/health
    ```
 
    Should return:
@@ -82,14 +83,14 @@ This guide will help you deploy your Socket.IO server to Vercel.
      "connectedUsers": 0,
      "activeRooms": 0,
      "environment": "production",
-     "platform": "vercel"
+     "platform": "render"
    }
    ```
 
 2. **Test Client:**
 
    ```
-   https://your-app-name.vercel.app/index.html
+   https://your-app-name.onrender.com/index.html
    ```
 
 3. **Socket.IO Connection:**
@@ -105,8 +106,8 @@ Update your frontend Socket.IO connection:
 // Development
 const socket = io("http://localhost:3000");
 
-// Production (Vercel)
-const socket = io("https://your-app-name.vercel.app");
+// Production (Render)
+const socket = io("https://your-app-name.onrender.com");
 ```
 
 ## 🚨 Common Issues & Solutions
@@ -116,98 +117,80 @@ const socket = io("https://your-app-name.vercel.app");
 - **Issue:** `npm install` fails
 - **Solution:** Check `package.json` has all dependencies listed
 
-### Socket.IO Connection Issues
+### App Won't Start
 
-- **Issue:** WebSocket connection fails
-- **Solution:** Vercel supports WebSockets, check your client configuration
+- **Issue:** Port binding errors
+- **Solution:** Use `process.env.PORT` in your code (already configured)
 
 ### CORS Errors
 
 - **Issue:** Frontend can't connect to Socket.IO
 - **Solution:** Set `CORS_ORIGIN` environment variable
 
-### Function Timeout
+### Socket.IO Connection Issues
 
-- **Issue:** Long-running operations timeout
-- **Solution:** Vercel has a 30-second timeout limit (configured in vercel.json)
+- **Issue:** WebSocket connection fails
+- **Solution:** Render supports WebSockets, check your client configuration
 
-## 📊 Monitoring & Logs
+## �� Monitoring & Logs
 
 ### View Logs
 
-- Go to your project dashboard on Vercel
-- Click "Functions" tab
-- View real-time logs for each function
+- Go to your service dashboard on Render
+- Click "Logs" tab
+- View real-time logs
 
-### Analytics
+### Health Checks
 
-- Built-in analytics and performance monitoring
-- Real-time metrics and error tracking
+- Render automatically checks `/api/health` endpoint
+- Service restarts if health check fails
 
 ## 🔄 Automatic Deployments
 
 - Push to your `main` branch
-- Vercel automatically rebuilds and deploys
-- Preview deployments for pull requests
+- Render automatically rebuilds and deploys
 - No manual intervention needed
 
 ## 💰 Pricing
 
-| Plan       | Price     | Features                           |
-| ---------- | --------- | ---------------------------------- |
-| Hobby      | $0/month  | 100GB bandwidth, 100GB storage     |
-| Pro        | $20/month | 1TB bandwidth, 1TB storage         |
-| Enterprise | Custom    | Unlimited bandwidth, custom limits |
+| Plan     | Price     | Features                                |
+| -------- | --------- | --------------------------------------- |
+| Free     | $0/month  | 750 hours/month, sleep after inactivity |
+| Starter  | $7/month  | Always on, 512MB RAM                    |
+| Standard | $25/month | Always on, 1GB RAM                      |
 
-## 🎯 Free Tier Features
+## 🎯 Free Tier Limitations
 
-- **100GB bandwidth** per month
-- **100GB storage**
-- **Unlimited serverless functions**
-- **Automatic HTTPS**
-- **Global CDN**
-- **Custom domains**
-
-## ⚠️ Vercel Limitations
-
-- **Function timeout:** 30 seconds maximum
-- **Memory:** 1024MB per function
-- **WebSocket:** Supported but with some limitations
-- **File system:** Read-only in production
+- **Sleep after inactivity:** App goes to sleep after 15 minutes of no traffic
+- **Cold starts:** First request after sleep takes 10-30 seconds
+- **Bandwidth:** 100GB/month
+- **Build minutes:** 400 minutes/month
 
 ## 📞 Support
 
-- **Vercel Documentation:** [vercel.com/docs](https://vercel.com/docs)
-- **Community:** [github.com/vercel/vercel/discussions](https://github.com/vercel/vercel/discussions)
-- **Status Page:** [vercel-status.com](https://vercel-status.com)
+- **Render Documentation:** [render.com/docs](https://render.com/docs)
+- **Community:** [render.com/community](https://render.com/community)
+- **Status Page:** [status.render.com](https://status.render.com)
 
 ## 🚀 Quick Start Commands
 
 ```bash
 # 1. Push your code to GitHub
 git add .
-git commit -m "Ready for Vercel deployment"
+git commit -m "Ready for Render deployment"
 git push origin main
 
-# 2. Deploy on Vercel (via web interface)
+# 2. Deploy on Render (via web interface)
 # Follow the steps above
 
 # 3. Test your deployment
-curl https://your-app-name.vercel.app/api/health
+curl https://your-app-name.onrender.com/api/health
 ```
 
-## 🔧 Vercel CLI (Optional)
+## 🎯 Why Render is Better for Socket.IO
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login to Vercel
-vercel login
-
-# Deploy from command line
-vercel
-
-# Deploy to production
-vercel --prod
-```
+- ✅ **Persistent connections** - Supports WebSocket connections
+- ✅ **State management** - Can maintain user sessions and room state
+- ✅ **Real-time capabilities** - Perfect for Socket.IO applications
+- ✅ **Free tier** - Available for testing and small projects
+- ✅ **Easy deployment** - Simple Git-based deployment

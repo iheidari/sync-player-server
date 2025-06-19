@@ -28,15 +28,19 @@ const io = socketIo(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Serve static files with absolute path
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files - handle both development and production paths
+const publicPath =
+  process.env.NODE_ENV === "production"
+    ? path.join(process.cwd(), "public") // Render uses process.cwd()
+    : path.join(__dirname, "public"); // Local development
+
+app.use(express.static(publicPath));
 
 // Debug route to check if static files are being served
 app.get("/debug-static", (req, res) => {
   const fs = require("fs");
 
   try {
-    const publicPath = path.join(__dirname, "public");
     const files = fs.readdirSync(publicPath);
     res.json({
       message: "Static files debug",
@@ -45,19 +49,22 @@ app.get("/debug-static", (req, res) => {
       indexExists: fs.existsSync(path.join(publicPath, "index.html")),
       cwd: process.cwd(),
       __dirname: __dirname,
+      nodeEnv: process.env.NODE_ENV,
     });
   } catch (error) {
     res.json({
       error: error.message,
+      publicPath: publicPath,
       cwd: process.cwd(),
       __dirname: __dirname,
+      nodeEnv: process.env.NODE_ENV,
     });
   }
 });
 
 // Specific route for index.html
 app.get("/index.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
 // Store connected users and their rooms

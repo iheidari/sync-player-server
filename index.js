@@ -22,20 +22,15 @@ const io = socketIo(server, {
   cors: corsOptions,
   pingTimeout: 60000,
   pingInterval: 25000,
+  transports: ["websocket", "polling"],
 });
 
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Serve static files - handle both development and production paths
-const publicPath =
-  process.env.NODE_ENV === "production"
-    ? path.join(process.cwd(), "public") // Render uses process.cwd()
-    : path.join(__dirname, "public"); // Local development
-
-console.log("🚀 ~ publicPath:", publicPath);
-
+// Serve static files
+const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
 // Debug route to check if static files are being served
@@ -52,6 +47,7 @@ app.get("/debug-static", (req, res) => {
       cwd: process.cwd(),
       __dirname: __dirname,
       nodeEnv: process.env.NODE_ENV,
+      platform: process.env.VERCEL ? "vercel" : "other",
     });
   } catch (error) {
     res.json({
@@ -60,6 +56,7 @@ app.get("/debug-static", (req, res) => {
       cwd: process.cwd(),
       __dirname: __dirname,
       nodeEnv: process.env.NODE_ENV,
+      platform: process.env.VERCEL ? "vercel" : "other",
     });
   }
 });
@@ -67,6 +64,22 @@ app.get("/debug-static", (req, res) => {
 // Specific route for index.html
 app.get("/index.html", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
+});
+
+// Root route for basic info
+app.get("/", (req, res) => {
+  res.json({
+    message: "Sync Player Server is running!",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    platform: process.env.VERCEL ? "vercel" : "other",
+    endpoints: {
+      health: "/api/health",
+      rooms: "/api/rooms",
+      testClient: "/index.html",
+      debug: "/debug-static",
+    },
+  });
 });
 
 // Store connected users and their rooms
@@ -271,21 +284,7 @@ app.get("/api/health", (req, res) => {
     connectedUsers: connectedUsers.size,
     activeRooms: rooms.size,
     environment: process.env.NODE_ENV || "development",
-  });
-});
-
-// Root route for basic info
-app.get("/", (req, res) => {
-  res.json({
-    message: "Sync Player Server is running!",
-    version: "1.0.0",
-    environment: process.env.NODE_ENV || "development",
-    endpoints: {
-      health: "/api/health",
-      rooms: "/api/rooms",
-      testClient: "/index.html",
-      debug: "/debug-static",
-    },
+    platform: process.env.VERCEL ? "vercel" : "other",
   });
 });
 
@@ -294,6 +293,10 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`Platform: ${process.env.VERCEL ? "vercel" : "other"}`);
   console.log(`Socket.IO server ready for room management`);
   console.log(`Test client available at: http://localhost:${PORT}`);
 });
+
+// Export for Vercel
+module.exports = app;

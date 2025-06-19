@@ -34,6 +34,8 @@ const publicPath =
     ? path.join(process.cwd(), "public") // Render uses process.cwd()
     : path.join(__dirname, "public"); // Local development
 
+console.log("🚀 ~ publicPath:", publicPath);
+
 app.use(express.static(publicPath));
 
 // Debug route to check if static files are being served

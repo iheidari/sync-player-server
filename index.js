@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -26,7 +27,38 @@ const io = socketIo(server, {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.static("public"));
+
+// Serve static files with absolute path
+app.use(express.static(path.join(__dirname, "public")));
+
+// Debug route to check if static files are being served
+app.get("/debug-static", (req, res) => {
+  const fs = require("fs");
+
+  try {
+    const publicPath = path.join(__dirname, "public");
+    const files = fs.readdirSync(publicPath);
+    res.json({
+      message: "Static files debug",
+      publicPath: publicPath,
+      files: files,
+      indexExists: fs.existsSync(path.join(publicPath, "index.html")),
+      cwd: process.cwd(),
+      __dirname: __dirname,
+    });
+  } catch (error) {
+    res.json({
+      error: error.message,
+      cwd: process.cwd(),
+      __dirname: __dirname,
+    });
+  }
+});
+
+// Specific route for index.html
+app.get("/index.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // Store connected users and their rooms
 const connectedUsers = new Map();
@@ -243,6 +275,7 @@ app.get("/", (req, res) => {
       health: "/api/health",
       rooms: "/api/rooms",
       testClient: "/index.html",
+      debug: "/debug-static",
     },
   });
 });

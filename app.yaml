@@ -1,0 +1,19 @@
+runtime: nodejs20
+service: default
+
+env_variables:
+  NODE_ENV: production
+  PORT: 8080
+  CORS_ORIGIN: "*"
+
+basic_scaling:
+  max_instances: 5
+  idle_timeout: 10m
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+inbound_services:
+  - warmup

@@ -288,12 +288,24 @@ app.get("/api/rooms/:roomId", (req, res) => {
 });
 
 app.get("/api/health", (req, res) => {
+  // Detect platform based on environment
+  let platform = "development";
+  if (process.env.NODE_ENV === "production") {
+    if (process.env.GAE_ENV) {
+      platform = "google-app-engine";
+    } else if (process.env.K_SERVICE) {
+      platform = "google-cloud-run";
+    } else {
+      platform = "production";
+    }
+  }
+
   res.json({
     status: "ok",
     connectedUsers: connectedUsers.size,
     activeRooms: rooms.size,
     environment: process.env.NODE_ENV || "development",
-    platform: "render",
+    platform: platform,
     corsOrigin: process.env.CORS_ORIGIN,
   });
 });
@@ -301,9 +313,21 @@ app.get("/api/health", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
+  // Detect platform for logging
+  let platform = "development";
+  if (process.env.NODE_ENV === "production") {
+    if (process.env.GAE_ENV) {
+      platform = "Google App Engine";
+    } else if (process.env.K_SERVICE) {
+      platform = "Google Cloud Run";
+    } else {
+      platform = "production";
+    }
+  }
+
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`Platform: render`);
+  console.log(`Platform: ${platform}`);
   console.log(
     `CORS Origin: ${process.env.CORS_ORIGIN || "all origins allowed"}`
   );

@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-const path = require("path");
+
 require("dotenv").config();
 
 const app = express();
@@ -31,49 +31,6 @@ const io = socketIo(server, {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Serve static files - handle both development and production paths
-const publicPath =
-  process.env.NODE_ENV === "production"
-    ? path.join(process.cwd(), "public") // Render uses process.cwd()
-    : path.join(__dirname, "public"); // Local development
-
-app.use(express.static(publicPath));
-
-// Debug route to check if static files are being served
-app.get("/debug-static", (req, res) => {
-  const fs = require("fs");
-
-  try {
-    const files = fs.readdirSync(publicPath);
-    res.json({
-      message: "Static files debug",
-      publicPath: publicPath,
-      files: files,
-      indexExists: fs.existsSync(path.join(publicPath, "index.html")),
-      cwd: process.cwd(),
-      __dirname: __dirname,
-      nodeEnv: process.env.NODE_ENV,
-      platform: "render",
-      corsOrigin: process.env.CORS_ORIGIN,
-    });
-  } catch (error) {
-    res.json({
-      error: error.message,
-      publicPath: publicPath,
-      cwd: process.cwd(),
-      __dirname: __dirname,
-      nodeEnv: process.env.NODE_ENV,
-      platform: "render",
-      corsOrigin: process.env.CORS_ORIGIN,
-    });
-  }
-});
-
-// Specific route for index.html
-app.get("/index.html", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
-});
-
 // Root route for basic info
 app.get("/", (req, res) => {
   res.json({
@@ -85,8 +42,6 @@ app.get("/", (req, res) => {
     endpoints: {
       health: "/api/health",
       rooms: "/api/rooms",
-      testClient: "/index.html",
-      debug: "/debug-static",
     },
   });
 });

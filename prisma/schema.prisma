@@ -17,6 +17,8 @@ model Room {
     createdBy String
     createdAt DateTime @default(now())
     note      String?
+    isPrivate Boolean  @default(false)
+    value     String?
 
     @@map("rooms")
 }

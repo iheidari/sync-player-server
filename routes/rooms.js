@@ -37,7 +37,7 @@ async function generateUniqueSlug(baseSlug) {
 // CREATE - Create a new room
 router.post("/", async (req, res) => {
   try {
-    const { name, createdBy, note } = req.body;
+    const { name, createdBy, note, isPrivate, value } = req.body;
 
     // Validate required fields
     if (!name || !createdBy) {
@@ -59,6 +59,8 @@ router.post("/", async (req, res) => {
         slug: uniqueSlug,
         createdBy,
         note: note || null,
+        isPrivate: isPrivate || false,
+        value: value || null,
       },
     });
 
@@ -176,7 +178,7 @@ router.get("/slug/:slug", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, note } = req.body;
+    const { name, slug, note, isPrivate, value } = req.body;
 
     // Check if room exists
     const existingRoom = await prisma.room.findUnique({
@@ -209,6 +211,8 @@ router.put("/:id", async (req, res) => {
         ...(name && { name }),
         ...(slug && { slug }),
         ...(note !== undefined && { note }),
+        ...(isPrivate !== undefined && { isPrivate }),
+        ...(value !== undefined && { value }),
       },
     });
 
